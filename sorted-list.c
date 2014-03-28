@@ -71,11 +71,20 @@ int SLInsert(SortedListPtr list, void *newObj){
 	prev=curr;
 	curr=curr->next;
 	while(curr!=NULL){
-		if((comparison = list->comp(newObj, curr->obj)) >= 0){ /*if it equals curr or newobj is greater, we insert, and return*/
+		if((comparison = list->comp(newObj, curr->obj)) > 0){ /*if it equals curr or newobj is greater, we insert, and return*/
 			temp->next=prev->next;
 			prev->next=temp;
 			return 1;
 		}
+		else if((comparison = list->comp(newObj, curr->obj)) == 0)
+        {
+            SortedListIteratorPtr iter = SLCreateIterator(((KeyVal)newObj->obj)->list);
+            Value currVal;
+            while((currVal = (Value)SLNextItem(iter)) != NULL);
+            {
+                SLInsert(((KeyVal)(curr->Obj))->list, (void *)currVal);
+            }
+        }
 		prev=curr;							/*else we simply move along the list*/
 		curr=curr->next;
 	}

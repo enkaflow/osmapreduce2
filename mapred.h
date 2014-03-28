@@ -14,10 +14,17 @@
 struct KeyVal_
 {
     char *key;
+    SortedListPtr list;
     int value;
     int hashVal;
 };
 typedef struct KeyVal_ *KeyVal;
+struct Value_
+{
+    int val;
+    struct Value_ *next;
+};
+typedef struct Value_ *Value;
 
 struct MapArgPtr_
 {
@@ -58,6 +65,7 @@ RedArgPtr createRedArgPtr(SortedListPtr *mapLists, SortedListPtr list, char *key
 KeyVal createKeyVal(char *key, int value);
 
 int compareStrings(void*currObj, void*newObj);
+int compareInts(void* currObj, void *newObj);
 int hashfn(char * input, int reduce_workers);
 
 
