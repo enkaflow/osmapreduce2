@@ -337,5 +337,49 @@ void *reduce_wordcount(void *targs)
 }
 void *reduce_sort(void *targs)
 {
-    return NULL;
+	/*
+	 * Description: consolidates all (k, {numbers}) lists into a single (k, {sorted_numbers}) list
+	 * Parameters: map worker outputs (lists[]), reduce worker output structure (redLists[]), key to be reduced (key)
+	 * Modifies: outList ONLY
+	 * Returns: nothing
+	 * Comments: outList is created but has 0 entries at this point.
+	 *           Don't need semaphore because this is the only reduce worker
+	 */
+
+	SortedListPtr *mapList = ((RedArgPtr)targs)->mapLists;
+	SortedListPtr outList = ((RedArgPtr)targs)->list;
+	char *key = ((RedArgPtr)targs)->key;
+	int numMaps = ((RedArgPtr)targs)->numMaps;
+	
+	SortedListIteratorPtr inputIter;
+	SortedListIteratorPtr outputIter;
+	SortedListIteratorPtr valueIter;
+	KeyVal KVPtr;
+	KeyVal firstElement;
+	Value valuePtr;
+	int i;
+	
+	firstElement = createKeyVal(key, 0); //2nd argument is unused
+	SLInsert(outList, firstElement);
+	
+	outputIter = SLCreateIterator(outList); //now that we have created a ('k', {}) pair, we must populate the inner list in a sorted way
+	
+	for(i=0; i<numMaps; i++)  //for each map output
+	{
+		inputIter = SLCreateIterator(maplist[i]); //there will only be KeyVal in each mapList, but we loop thru "all" of them anyway
+		while((KVPtr = (KeyVal)SLNextItem(inputIter)) != NULL)
+		{
+			valueIter = SLCreateIterator(KVPtr->list); //get access to the sorted Value list
+			while((valuePtr = (Value)SLNextItem(valueIter)) != NULL) 
+			{
+				SLInsert(outList, valuePtr->value); //insert 1 by 1 into output
+			}
+		}
+	}
+	
+	SLDestroyIterator(inputIter);
+	SLDestroyIterator(outputIter);
+	SLDestroyIterator(valueIter);
+	
+	return NULL;
 }
