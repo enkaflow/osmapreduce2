@@ -132,7 +132,7 @@ KeyVal createKeyVal(char *key, int value)
     keyVal->key = key;
     keyVal->value = value;
     keyVal->list = SLCreate(cf);
-    SLInsert(keyVal, (void*)createValue(value));
+    //SLInsert(keyVal, (void*)createValue(value)); 
     return keyVal;
 }
 Value createValue(int val)
@@ -290,7 +290,23 @@ void *map_wordcount(void *targs)
 }
 void *map_sort(void *targs)
 {
-    return NULL;
+    MapArgPtr args = (MapArgPtr)targs;
+    FILE *input = args->input;
+    SortedListPtr list = args->list;
+    char line[10]; //int can never exceed 10chars (max_int value ~ 2bil -> 10 digits)
+	//assume ints are separated by lines
+	KeyVal soleElement;
+	SortedListPtr valueList;
+	
+	soleElement = createKeyVal("k", 0); //neither key nor value matter
+	valueList = soleElement->list;	
+	
+	//populate value list with inputs
+	while(fgets(line, sizeof(line), input))
+	{
+		SLInsert(valueList, (void*)createValue(atoi(line))); //key doesn't matter in this case
+	}
+    return targs;
 }
 void *reduce_wordcount(void *targs)
 {
@@ -320,7 +336,7 @@ void *reduce_wordcount(void *targs)
 		p = SLCreateIterator(mapLists[i]);
 		while((thisKV = (KeyVal)SLNextItem(p)) != NULL)
 		{	/*go through each KeyVal pair in each map, compare hashes.*/
-			if(thisKV->hashVal == hash)
+			if(strcmp(thisKV->key, key) == 0) //CHECK THIS LOGIC
 				keyCount++;
 		}
 	}
@@ -360,7 +376,7 @@ void *reduce_sort(void *targs)
 	int i;
 	
 	firstElement = createKeyVal(key, 0); //2nd argument is unused
-	SLInsert(outList, firstElement);
+	SLInsert(outList, (void*)firstElement);
 	
 	outputIter = SLCreateIterator(outList); //now that we have created a ('k', {}) pair, we must populate the inner list in a sorted way
 	
@@ -372,7 +388,7 @@ void *reduce_sort(void *targs)
 			valueIter = SLCreateIterator(KVPtr->list); //get access to the sorted Value list
 			while((valuePtr = (Value)SLNextItem(valueIter)) != NULL) 
 			{
-				SLInsert(outList, valuePtr->value); //insert 1 by 1 into output
+				SLInsert(outList, (void*)valuePtr->value); //insert 1 by 1 into output
 			}
 		}
 	}
