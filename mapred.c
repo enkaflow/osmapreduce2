@@ -158,7 +158,13 @@ int compareStrings(void*currObj, void*newObj)
     KeyVal newKeyVal = (KeyVal)newObj;
     return strcmp(currKeyVal->key, newKeyVal->key);
 }
+int compareInts(void *currObj, void* newObj)
+{
+    Value currVal = (Value)currObj;
+    Value newVal = (Value)newObj;
 
+
+}
 int hashfn(char * input, int reduce_workers)
 {
     int hash = 5381;
