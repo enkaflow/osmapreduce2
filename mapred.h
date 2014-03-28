@@ -63,6 +63,7 @@ char *makeLowerCase(char *string);
 MapArgPtr createMapArgPtr(FILE *input, SortedListPtr list);
 RedArgPtr createRedArgPtr(SortedListPtr *mapLists, SortedListPtr list, char *key, int numMaps, int numReds);
 KeyVal createKeyVal(char *key, int value);
+Value createValue(int val);
 
 int compareStrings(void*currObj, void*newObj);
 int compareInts(void* currObj, void *newObj);

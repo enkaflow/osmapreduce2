@@ -112,7 +112,14 @@ char *makeLowerCase(char *string)
     char *lower = malloc(sizeof(char)*strlen(string));
     while(string[i]!= '\0')
     {
-        lower[i] = tolower(string[i]);
+        if(isalpha(string[i]))
+        {
+           lower[i] = tolower(string[i]);
+        }
+        else
+        {
+            lower[i] = string[i];
+        }
         i++;
     }
     return lower;
@@ -120,10 +127,20 @@ char *makeLowerCase(char *string)
 KeyVal createKeyVal(char *key, int value)
 {
     /*Desripcion: creates and new KeyVal struct*/
+    CompareFuncT cf = compareInts;
     KeyVal keyVal = malloc(sizeof(struct KeyVal_));
     keyVal->key = key;
     keyVal->value = value;
+    keyVal->list = SLCreate(cf);
+    SLInsert(keyVal, (void*)createValue(value));
     return keyVal;
+}
+Value createValue(int val)
+{
+    Value value = malloc(sizeof(struct Value_));
+    value->val = val;
+    value->next = NULL;
+    return value;
 }
 
 void cleanup(char *fileName, int numFiles, FILE **inputs, SortedListPtr *lists)
@@ -163,7 +180,9 @@ int compareInts(void *currObj, void* newObj)
     Value currVal = (Value)currObj;
     Value newVal = (Value)newObj;
 
+    if(newVal->val < currVal->val){return -1;}
 
+    return 1;
 }
 int hashfn(char * input, int reduce_workers)
 {
